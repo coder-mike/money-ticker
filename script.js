@@ -80,8 +80,15 @@ function Ticker() {
     }
   }
 
+  function setValue(newValue) {
+    startValue = newValue;
+    startTime = Date.now();
+    save();
+    ticker.update();
+  }
+
   return {
-    update
+    update, setValue
   }
 }
 
@@ -89,13 +96,6 @@ function resetStart() {
   const now = Date.now();
   startValue = getCurrentValue(now);
   startTime = now;
-}
-
-function setValue(newValue) {
-  startValue = newValue;
-  startTime = Date.now();
-  save();
-  ticker.update();
 }
 
 function getCurrentValue(now) {
