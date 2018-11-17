@@ -34,7 +34,10 @@ class Ticker {
     this.updateFrame();
   }
 
-  get value() { return {...this._value }; };
+  get value() {
+    this.resetStart();
+    return {...this._value };
+  };
   set value(value) {
     this._value = { ...value };
     this.updateFrame();

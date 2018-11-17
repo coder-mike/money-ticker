@@ -38,7 +38,6 @@ updatePauseButton();
 function save() {
   saveValue('earned', earnedTicker.value);
   saveValue('remaining', remainingTicker.value);
-
 }
 
 function loadValue(key, defaultValue) {
