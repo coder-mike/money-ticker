@@ -27,7 +27,8 @@ class Ticker {
     this._value = {
       startTime: 0,
       startValue: 0,
-      rate: 0
+      rate: 0,
+      ticking: false
     };
     this.frame = 0;
     this.updateFrame();
@@ -39,15 +40,8 @@ class Ticker {
     this.updateFrame();
   }
 
-  get ticking() { return this._ticking; }
-  set ticking(value) {
-    this.resetStart();
-    this._ticking = value;
-    this.updateFrame();
-  }
-
   updateFrame() {
-    const { startTime, rate, startValue } = this._value;
+    const { startTime, rate, startValue, ticking } = this._value;
 
     this.timeout && clearTimeout(this.timeout);
     this.timeout = undefined;
@@ -66,7 +60,7 @@ class Ticker {
     currentEl.innerHTML = renderValue(prevValue);
     nextEl.innerHTML = renderValue(nextValue);
 
-    if (this._ticking) {
+    if (ticking) {
       const timeOfNext = startTime + (nextValue - startValue) / rate;
       const sleepAmount = timeOfNext - now;
 
@@ -93,8 +87,8 @@ class Ticker {
   }
 
   getCurrentValue(now) {
-    const { startValue, startTime, rate } = this._value;
-    return startValue + (now - startTime) * rate * (this._ticking ? 1 : 0);
+    const { startValue, startTime, rate, ticking } = this._value;
+    return startValue + (now - startTime) * rate * (ticking ? 1 : 0);
   }
 
   resetStart() {

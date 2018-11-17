@@ -2,7 +2,6 @@
 
 const oneHour = 3600000;
 
-
 document.querySelector('#pause').addEventListener('click', pauseClick);
 
 const ticker = new Ticker(document.querySelector('#earned'));
@@ -10,8 +9,8 @@ ticker.value = {
   startTime: loadValue('startTime', Date.now()),
   startValue: loadValue('startValue', 0),
   rate: loadValue('rate', 60 / oneHour),
+  ticking: loadValue('isWorking', true)
 };
-ticker.ticking = loadValue('isWorking', true);
 save();
 updatePauseButton();
 
@@ -40,11 +39,14 @@ function saveValue(key, value) {
 }
 
 function pauseClick() {
-  ticker.ticking = !ticker.ticking;
+  ticker.value = {
+    ...ticker.value,
+    ticking: !ticker.value.ticking
+  };
   updatePauseButton();
   save();
 }
 
 function updatePauseButton() {
-  document.querySelector('#pause').value = ticker.ticking ? 'Pause' : 'Continue';
+  document.querySelector('#pause').value = ticker.value.ticking ? 'Pause' : 'Continue';
 }
