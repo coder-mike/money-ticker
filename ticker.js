@@ -11,11 +11,13 @@ class Ticker {
     this.container.style.position = 'relative';
 
     this.counter1 = document.createElement('div');
-    this.counter1.style.position = 'absolute';
     container.appendChild(this.counter1);
 
     this.counter2 = document.createElement('div');
     this.counter2.style.position = 'absolute';
+    this.counter2.style.top = '0';
+    this.counter2.style.width = '100%';
+    this.counter2.style.height = '100%';
     this.counter2.style.backgroundColor = 'white';
     this.counter2.style.opacity = '0';
     container.appendChild(this.counter2);
@@ -28,23 +30,23 @@ class Ticker {
       rate: 0
     };
     this.frame = 0;
-    this.update();
+    this.updateFrame();
   }
 
   get value() { return {...this._value }; };
   set value(value) {
     this._value = { ...value };
-    this.update();
+    this.updateFrame();
   }
 
   get ticking() { return this._ticking; }
   set ticking(value) {
     this.resetStart();
     this._ticking = value;
-    this.update();
+    this.updateFrame();
   }
 
-  update() {
+  updateFrame() {
     const { startTime, rate, startValue } = this._value;
 
     this.timeout && clearTimeout(this.timeout);
@@ -60,9 +62,6 @@ class Ticker {
     // console.log('prevValue', prevValue, 'value', currentValue, 'nextValue', nextValue, 'interp', interpolationFactor);
     const currentEl = this.frame === 0 ? this.counter1 : this.counter2;
     const nextEl = this.frame === 0 ? this.counter2 : this.counter1;
-    this.container.appendChild(nextEl);
-
-    this.frame = (this.frame + 1) % 2;
 
     currentEl.innerHTML = renderValue(prevValue);
     nextEl.innerHTML = renderValue(nextValue);
@@ -72,33 +71,25 @@ class Ticker {
       const sleepAmount = timeOfNext - now;
 
       if (animatedTransition && sleepAmount > 15) {
-        currentEl.style.transition = 'none';
-        currentEl.style.color = '#444';
-        currentEl.style.opacity = 1;
-        nextEl.style.transition = 'none';
-        nextEl.style.color = '#444';
-        nextEl.style.opacity = interpolationFactor;
+        this.counter2.style.transition = 'none';
+        this.counter2.style.opacity = this.frame === 0 ? interpolationFactor : 1 - interpolationFactor;
         // Force current opacity
-        window.getComputedStyle(currentEl).opacity;
-        window.getComputedStyle(nextEl).opacity;
-        nextEl.style.transition = `all ${sleepAmount}ms linear`;
-        nextEl.style.opacity = 1; // Fade in
-        nextEl.style.color = '#444';
+        window.getComputedStyle(this.counter2).opacity;
+
+        this.counter2.style.transition = `all ${sleepAmount}ms linear`;
+        this.counter2.style.opacity = this.frame === 0 ? 1 : 0;
       } else {
-        currentEl.style.opacity = 1;
-        nextEl.style.opacity = 0;
+        this.counter2.style.transition = 'none';
+        this.counter2.style.opacity = this.frame === 0 ? 0 : 1;
       }
 
       // console.log('next tick in', sleepAmount);
-      this.timeout = setTimeout(() => this.update(), sleepAmount);
+      this.timeout = setTimeout(() => this.updateFrame(), sleepAmount);
     } else {
-      currentEl.style.transition = 'none';
-      currentEl.style.opacity = 1;
-      currentEl.style.color = '#844';
-      nextEl.style.transition = 'none';
-      nextEl.style.opacity = interpolationFactor;
-      nextEl.style.color = '#844';
+      this.counter2.style.transition = 'none';
+      this.counter2.style.opacity = this.frame === 0 ? interpolationFactor : 1 - interpolationFactor;
     }
+    this.frame = (this.frame + 1) % 2;
   }
 
   getCurrentValue(now) {
@@ -115,7 +106,7 @@ class Ticker {
   setValue(newValue) {
     this.resetStart();
     this._value.startValue = newValue;
-    ticker.update();
+    ticker.updateFrame();
   }
 }
 
