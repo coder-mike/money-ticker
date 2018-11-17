@@ -24,6 +24,8 @@ function update() {
   timeout && clearTimeout(timeout);
   timeout = undefined;
 
+  document.querySelector('#pause').value = isWorking ? 'Pause' : 'Continue';
+
   const now = Date.now();
   const currentValue = getCurrentValue(now);
   const prevValue = (Math.floor(currentValue / increment)) * increment;
@@ -44,15 +46,14 @@ function update() {
 
   if (isWorking) {
     const timeOfNext = startTime + (nextValue - startValue) / rate;
-    const timeUntilNext = timeOfNext - now;
-    const sleepAmount = Math.max(15, timeUntilNext);
+    const sleepAmount = timeOfNext - now;
 
-    if (animatedTransition) {
+    if (animatedTransition && sleepAmount > 15) {
       currentEl.style.transition = 'none';
       currentEl.style.color = '#444';
       currentEl.style.opacity = 1;
       nextEl.style.transition = 'none';
-      nextEl.style.color = 'green';
+      nextEl.style.color = '#444';
       nextEl.style.opacity = interpolationFactor;
       // Force current opacity
       window.getComputedStyle(currentEl).opacity;
@@ -68,9 +69,11 @@ function update() {
     timeout = setTimeout(update, sleepAmount);
   } else {
     currentEl.style.transition = 'none';
-    nextEl.style.transition = 'none';
     currentEl.style.opacity = 1;
-    nextEl.style.opacity = 0;
+    currentEl.style.color = '#844';
+    nextEl.style.transition = 'none';
+    nextEl.style.opacity = interpolationFactor;
+    nextEl.style.color = '#844';
   }
 }
 
@@ -116,7 +119,6 @@ function saveValue(key, value) {
 function pauseClick() {
   resetStart();
   isWorking = !isWorking;
-  document.querySelector('#pause').value = isWorking ? 'Pause' : 'Continue';
   save();
   update();
 }
