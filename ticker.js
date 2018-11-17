@@ -61,7 +61,7 @@ class Ticker {
     let interpolationFactor = (currentValue - prevValue) / (nextValue - prevValue);
     interpolationFactor = Math.max(Math.min(interpolationFactor, 1), 0);
     const renderValue = value => `$ ${value.toFixed(decimals)}`;
-    console.log('prevValue', prevValue, 'value', currentValue, 'nextValue', nextValue, 'interp', interpolationFactor);
+    // console.log('prevValue', prevValue, 'value', currentValue, 'nextValue', nextValue, 'interp', interpolationFactor);
     const currentEl = this.frame === 0 ? this.counter1 : this.counter2;
     const nextEl = this.frame === 0 ? this.counter2 : this.counter1;
 
@@ -89,7 +89,7 @@ class Ticker {
       this.timeout = setTimeout(() => this.updateFrame(), sleepAmount);
     } else {
       this.counter2.style.transition = 'none';
-      this.counter2.style.opacity = this.frame === 0 ? interpolationFactor : 1 - interpolationFactor;
+      this.counter2.style.opacity = this.frame === 0 ? 0 : 1;
     }
     this.frame = (this.frame + 1) % 2;
   }
