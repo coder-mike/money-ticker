@@ -5,7 +5,21 @@ const decimals = 1;
 const increment = 1 / Math.pow(10, decimals);
 
 class Ticker {
-  constructor() {
+  constructor(container) {
+    this.container = container;
+    this.container.innerHTML = '';
+    this.container.style.position = 'relative';
+
+    this.counter1 = document.createElement('div');
+    this.counter1.style.position = 'absolute';
+    container.appendChild(this.counter1);
+
+    this.counter2 = document.createElement('div');
+    this.counter2.style.position = 'absolute';
+    this.counter2.style.backgroundColor = 'white';
+    this.counter2.style.opacity = '0';
+    container.appendChild(this.counter2);
+
     this.timeout = undefined;
     this._ticking = false;
     this._value = {
@@ -44,10 +58,9 @@ class Ticker {
     interpolationFactor = Math.max(Math.min(interpolationFactor, 1), 0);
     const renderValue = value => `$ ${value.toFixed(decimals)}`;
     // console.log('prevValue', prevValue, 'value', currentValue, 'nextValue', nextValue, 'interp', interpolationFactor);
-    const currentEl = this.frame === 0 ? document.querySelector('#counter1') : document.querySelector('#counter2');
-    const nextEl = this.frame === 0 ? document.querySelector('#counter2') : document.querySelector('#counter1');
-    // The next element must be on top
-    document.querySelector('.counter-wrapper').appendChild(nextEl);
+    const currentEl = this.frame === 0 ? this.counter1 : this.counter2;
+    const nextEl = this.frame === 0 ? this.counter2 : this.counter1;
+    this.container.appendChild(nextEl);
 
     this.frame = (this.frame + 1) % 2;
 

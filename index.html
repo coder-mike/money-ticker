@@ -8,34 +8,21 @@
   <style>
     @import url('https://fonts.googleapis.com/css?family=Roboto:500');
 
-    .counter, .counter-wrapper {
+    #earned {
       position: absolute;
       top: 100px;
       width: 100%;
-    }
-
-    .counter {
       font-family: 'Roboto', sans-serif;
       font-size: 150px;
       font-weight: 500;
       color: #444;
-      background-color: white;
-    }
-
-    #counter1 {
-      opacity: 1;
-    }
-
-    #counter2 {
-      opacity: 0;
     }
 
   </style>
 </head>
 <body>
-  <div class="counter-wrapper">
-    <div class="counter" id="counter1">Starting...</div>
-    <div class="counter" id="counter2"></div>
+  <div id="earned" class="counter-wrapper">
+
   </div>
   <input type="button" value="Pause" id="pause"/>
   <script src="ticker.js"></script>

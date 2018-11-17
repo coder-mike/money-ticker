@@ -5,7 +5,7 @@ const oneHour = 3600000;
 
 document.querySelector('#pause').addEventListener('click', pauseClick);
 
-const ticker = new Ticker();
+const ticker = new Ticker(document.querySelector('#earned'));
 ticker.value = {
   startTime: loadValue('startTime', Date.now()),
   startValue: loadValue('startValue', 0),
