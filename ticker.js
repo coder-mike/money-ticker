@@ -48,12 +48,17 @@ class Ticker {
 
     const now = Date.now();
     const currentValue = this.getCurrentValue(now);
-    const prevValue = (Math.floor(currentValue / increment)) * increment;
-    const nextValue = (Math.round(prevValue / increment) + 1) * increment;
+    const increasing = rate >= 0;
+    const prevValue =
+      increasing
+        ? (Math.floor(currentValue / increment)) * increment
+        : (Math.ceil(currentValue / increment)) * increment;
+
+    const nextValue = (Math.round(prevValue / increment) + (increasing ? 1 : -1)) * increment;
     let interpolationFactor = (currentValue - prevValue) / (nextValue - prevValue);
     interpolationFactor = Math.max(Math.min(interpolationFactor, 1), 0);
     const renderValue = value => `$ ${value.toFixed(decimals)}`;
-    // console.log('prevValue', prevValue, 'value', currentValue, 'nextValue', nextValue, 'interp', interpolationFactor);
+    console.log('prevValue', prevValue, 'value', currentValue, 'nextValue', nextValue, 'interp', interpolationFactor);
     const currentEl = this.frame === 0 ? this.counter1 : this.counter2;
     const nextEl = this.frame === 0 ? this.counter2 : this.counter1;
 
@@ -100,7 +105,7 @@ class Ticker {
   setValue(newValue) {
     this.resetStart();
     this._value.startValue = newValue;
-    ticker.updateFrame();
+    earnedTicker.updateFrame();
   }
 }
 

@@ -4,22 +4,30 @@ const oneHour = 3600000;
 
 document.querySelector('#pause').addEventListener('click', pauseClick);
 
-const ticker = new Ticker(document.querySelector('#earned'));
-ticker.value = {
-  startTime: loadValue('startTime', Date.now()),
-  startValue: loadValue('startValue', 0),
-  rate: loadValue('rate', 60 / oneHour),
-  ticking: loadValue('isWorking', true)
-};
+const earnedTicker = new Ticker(document.querySelector('#earned'));
+const remainingTicker = new Ticker(document.querySelector('#remaining'));
+
+earnedTicker.value = loadValue('earned', {
+  startTime: Date.now(),
+  startValue: 0,
+  rate: 60 / oneHour,
+  ticking: true
+});
+
+remainingTicker.value = loadValue('remaining', {
+  startTime: +new Date('2018-11-18T22:00:01+11:00'),
+  startValue: 0,
+  rate: -60 / oneHour,
+  ticking: true
+});
+
 save();
 updatePauseButton();
 
 function save() {
-  const { startTime, startValue, rate } = ticker.value;
-  saveValue('startTime', startTime);
-  saveValue('startValue', startValue);
-  saveValue('rate', rate);
-  saveValue('isWorking', ticker.ticking);
+  saveValue('earned', earnedTicker.value);
+  saveValue('remaining', remainingTicker.value);
+
 }
 
 function loadValue(key, defaultValue) {
@@ -39,14 +47,14 @@ function saveValue(key, value) {
 }
 
 function pauseClick() {
-  ticker.value = {
-    ...ticker.value,
-    ticking: !ticker.value.ticking
+  earnedTicker.value = {
+    ...earnedTicker.value,
+    ticking: !earnedTicker.value.ticking
   };
   updatePauseButton();
   save();
 }
 
 function updatePauseButton() {
-  document.querySelector('#pause').value = ticker.value.ticking ? 'Pause' : 'Continue';
+  document.querySelector('#pause').value = earnedTicker.value.ticking ? 'Pause' : 'Continue';
 }
