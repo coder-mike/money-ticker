@@ -49,14 +49,17 @@ function update() {
 
     if (animatedTransition) {
       currentEl.style.transition = 'none';
-      nextEl.style.transition = 'none';
+      currentEl.style.color = '#444';
       currentEl.style.opacity = 1;
+      nextEl.style.transition = 'none';
+      nextEl.style.color = 'green';
       nextEl.style.opacity = interpolationFactor;
       // Force current opacity
       window.getComputedStyle(currentEl).opacity;
       window.getComputedStyle(nextEl).opacity;
-      nextEl.style.transition = `opacity ${sleepAmount}ms linear`;
+      nextEl.style.transition = `all ${sleepAmount}ms linear`;
       nextEl.style.opacity = 1; // Fade in
+      nextEl.style.color = '#444';
     } else {
       currentEl.style.opacity = 1;
       nextEl.style.opacity = 0;
