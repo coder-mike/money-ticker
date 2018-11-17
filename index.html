@@ -10,8 +10,11 @@
 
     .ticker {
       font-family: 'Roboto', sans-serif;
-      font-size: 150px;
       font-weight: 500;
+    }
+
+    #earned {
+      font-size: 150px;
       color: #444;
     }
 
@@ -20,6 +23,10 @@
       color: #454;
     }
 
+    #missed {
+      font-size: 100px;
+      color: #644;
+    }
   </style>
 </head>
 <body>
@@ -28,6 +35,8 @@
   <div id="earned" class="ticker"></div>
   <h3>Remaining today</h3>
   <div id="remaining" class="ticker"></div>
+  <h3>Missed</h3>
+  <div id="missed" class="ticker"></div>
   <script src="ticker.js"></script>
   <script src="script.js"></script>
 </body>

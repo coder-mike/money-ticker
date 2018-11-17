@@ -47,7 +47,7 @@ class Ticker {
     this.timeout = undefined;
 
     const now = Date.now();
-    const currentValue = this.getCurrentValue(now);
+    const currentValue = this.projected(now);
     const increasing = rate >= 0;
     const prevValue =
       increasing
@@ -91,14 +91,14 @@ class Ticker {
     this.frame = (this.frame + 1) % 2;
   }
 
-  getCurrentValue(now) {
+  projected(now) {
     const { startValue, startTime, rate, ticking } = this._value;
     return startValue + (now - startTime) * rate * (ticking ? 1 : 0);
   }
 
   resetStart() {
     const now = Date.now();
-    this._value.startValue = this.getCurrentValue(now);
+    this._value.startValue = this.projected(now);
     this._value.startTime = now;
   }
 
