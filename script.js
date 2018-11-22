@@ -7,6 +7,7 @@ document.querySelector('#pause').addEventListener('click', pauseClick);
 const earnedTicker = new Ticker(document.querySelector('#earned'));
 const remainingTicker = new Ticker(document.querySelector('#remaining'));
 const missedTicker = new Ticker(document.querySelector('#missed'));
+const targetTicker = new Ticker(document.querySelector('#target'));
 
 earnedTicker.value = loadValue('earned', {
   startTime: Date.now(),
@@ -26,6 +27,13 @@ remainingTicker.value = loadValue('remaining', {
 });
 
 missedTicker.value = {
+  startTime: dayEnd,
+  startValue: remainingTicker.projected(dayStart) - earnedTicker.projected(dayEnd),
+  rate: 60 / oneHour,
+  ticking: !earnedTicker.value.ticking,
+};
+
+targetTicker.value = {
   startTime: dayEnd,
   startValue: remainingTicker.projected(dayStart) - earnedTicker.projected(dayEnd),
   rate: 60 / oneHour,
