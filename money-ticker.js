@@ -2,7 +2,7 @@
 
 
 const animatedTransition = true;
-const decimals = 2;
+const decimals = 1;
 const increment = 1 / Math.pow(10, decimals);
 
 class MoneyTicker extends HTMLElement {
