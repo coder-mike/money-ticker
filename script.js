@@ -2,12 +2,15 @@
 
 const oneHour = 3600000;
 
-document.querySelector('#pause').addEventListener('click', pauseClick);
+document.querySelector('#pause-continue').addEventListener('click', pauseClick);
 
 const earnedTicker = document.querySelector('#earned');
 const remainingTicker = document.querySelector('#remaining');
 const missedTicker = document.querySelector('#missed');
 const targetTicker = document.querySelector('#target');
+
+const dayEnd = +new Date('2018-11-18T22:00:00+11:00');
+const dayStart = +new Date('2018-11-18T08:00:00+11:00');
 
 earnedTicker.value = loadValue('earned', {
   startTime: Date.now(),
@@ -15,9 +18,6 @@ earnedTicker.value = loadValue('earned', {
   rate: 60 / oneHour,
   ticking: true
 });
-
-const dayEnd = +new Date('2018-11-18T22:00:00+11:00');
-const dayStart = +new Date('2018-11-18T08:00:00+11:00');
 
 remainingTicker.value = loadValue('remaining', {
   startTime: dayEnd,
@@ -78,5 +78,12 @@ function pauseClick() {
 }
 
 function updatePauseButton() {
-  document.querySelector('#pause').value = earnedTicker.value.ticking ? 'Pause' : 'Continue';
+  const pauseContinueButton = document.querySelector('#pause-continue');
+  if (earnedTicker.value.ticking) {
+    pauseContinueButton.value = 'Pause';
+    pauseContinueButton.classList.remove('paused');
+  } else {
+    pauseContinueButton.value = 'Continue';
+    pauseContinueButton.classList.add('paused');
+  }
 }
