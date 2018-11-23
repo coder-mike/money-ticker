@@ -1,17 +1,22 @@
 'use strict';
 
+
 const animatedTransition = true;
-const decimals = 1;
+const decimals = 2;
 const increment = 1 / Math.pow(10, decimals);
 
-class Ticker {
-  constructor(container) {
-    this.container = container;
+class MoneyTicker extends HTMLElement {
+  constructor() {
+    super();
+    this.container = document.createElement('div');
+    this.innerHTML = '';
+    this.appendChild(this.container);
+
     this.container.innerHTML = '';
     this.container.style.position = 'relative';
 
     this.counter1 = document.createElement('div');
-    container.appendChild(this.counter1);
+    this.container.appendChild(this.counter1);
 
     this.counter2 = document.createElement('div');
     this.counter2.style.position = 'absolute';
@@ -20,7 +25,7 @@ class Ticker {
     this.counter2.style.height = '100%';
     this.counter2.style.backgroundColor = 'white';
     this.counter2.style.opacity = '0';
-    container.appendChild(this.counter2);
+    this.container.appendChild(this.counter2);
 
     this.timeout = undefined;
     this._ticking = false;
@@ -50,7 +55,7 @@ class Ticker {
     this.timeout = undefined;
 
     const now = Date.now();
-    const currentValue = this.projected(now);
+    const currentValue = this.valueAt(now);
     const increasing = rate >= 0;
     const prevValue =
       increasing
@@ -94,14 +99,14 @@ class Ticker {
     this.frame = (this.frame + 1) % 2;
   }
 
-  projected(now) {
+  valueAt(now) {
     const { startValue, startTime, rate, ticking } = this._value;
     return startValue + (now - startTime) * rate * (ticking ? 1 : 0);
   }
 
   resetStart() {
     const now = Date.now();
-    this._value.startValue = this.projected(now);
+    this._value.startValue = this.valueAt(now);
     this._value.startTime = now;
   }
 
@@ -112,3 +117,4 @@ class Ticker {
   }
 }
 
+customElements.define('money-ticker', MoneyTicker);

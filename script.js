@@ -4,10 +4,10 @@ const oneHour = 3600000;
 
 document.querySelector('#pause').addEventListener('click', pauseClick);
 
-const earnedTicker = new Ticker(document.querySelector('#earned'));
-const remainingTicker = new Ticker(document.querySelector('#remaining'));
-const missedTicker = new Ticker(document.querySelector('#missed'));
-const targetTicker = new Ticker(document.querySelector('#target'));
+const earnedTicker = document.querySelector('#earned');
+const remainingTicker = document.querySelector('#remaining');
+const missedTicker = document.querySelector('#missed');
+const targetTicker = document.querySelector('#target');
 
 earnedTicker.value = loadValue('earned', {
   startTime: Date.now(),
