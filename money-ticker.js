@@ -8,9 +8,11 @@ const increment = 1 / Math.pow(10, decimals);
 class MoneyTicker extends HTMLElement {
   constructor() {
     super();
+    const shadow = this.attachShadow({mode: 'open'});
+
     this.container = document.createElement('div');
     this.innerHTML = '';
-    this.appendChild(this.container);
+    shadow.appendChild(this.container);
 
     this.container.innerHTML = '';
     this.container.style.position = 'relative';
