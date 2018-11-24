@@ -1,5 +1,8 @@
 class Linear {
   static create(time, value, rate) {
+    console.assert(typeof time === 'number');
+    console.assert(typeof value === 'number');
+    console.assert(typeof rate === 'number');
     return { time, value, rate };
   }
 
@@ -8,9 +11,9 @@ class Linear {
 
     console.assert(typeof value === 'object'
       && value !== null
-      && value.time !== undefined
-      && value.value !== undefined
-      && value.rate !== undefined);
+      && typeof value.time === 'number'
+      && typeof value.value === 'number'
+      && typeof value.rate === 'number');
 
     return value;
   }

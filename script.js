@@ -2,25 +2,35 @@
 
 const hour = 3600000;
 const minute = 60000;
-
-document.querySelector('#pause-continue').addEventListener('click', pauseClick);
+const modelStructureVersion = 1;
+const configStructureVersion = 1;
 
 const earnedTicker = document.querySelector('#earned');
 const remainingTicker = document.querySelector('#remaining');
 const missedTicker = document.querySelector('#missed');
 const possibleTicker = document.querySelector('#possible');
+const pauseContinueButton = document.querySelector('#pause-continue');
 
-const model = loadModel();
+const config = loadConfig();
+const model = loadModel(config);
 
+pauseContinueButton.addEventListener('click', pauseClick);
 save();
 render();
 
 function save() {
-  window.localStorage.setItem('model', JSON.stringify(model));
+  saveToLocalStorage('model', model, modelStructureVersion);
+  saveToLocalStorage('config', config, configStructureVersion);
 }
 
 function pauseClick() {
   model.isPaused = !model.isPaused;
+  const effectiveRate = model.isPaused ? 0 : config.earnRate;
+  const now = Date.now();
+  model.earned = Linear.changeRate(model.earned, now, effectiveRate);
+  // TODO: There's some redundancy here
+  model.missed = Linear.subtract(model.potential, model.earned);
+  model.possible = Linear.add(model.earned, model.remaining);
   render();
   save();
 }
@@ -30,7 +40,7 @@ function render() {
   remainingTicker.value = model.remaining;
   missedTicker.value = model.missed;
   possibleTicker.value = model.possible;
-  const pauseContinueButton = document.querySelector('#pause-continue');
+
   if (model.isPaused) {
     pauseContinueButton.value = 'Continue';
     pauseContinueButton.classList.add('paused');
@@ -40,18 +50,15 @@ function render() {
   }
 }
 
-function loadModel() {
-
+function loadModel(config) {
   const now = Date.now();
   const day = new Date(now).setHours(0, 0, 0, 0);
 
-  const dayStartTime = 8 * 3600000; // 8 AM
-  const dayEndTime = 22 * 3600000; // 10 PM
-  const dayStart = day + dayStartTime;
-  const dayEnd = day + dayEndTime;
-  const earnRate = 1 / minute;
+  const dayStart = day + config.dayStartTime;
+  const dayEnd = day + config.dayEndTime;
+  const earnRate = config.earnRate;
 
-  const loaded = JSON.parse(window.localStorage.getItem('model'));
+  const loaded = loadFromLocalStorage('model', modelStructureVersion);
   // If the model stored in local storage is from today, then use that
   if (loaded && loaded.dayStart === dayStart) return loaded;
 
@@ -72,8 +79,17 @@ function loadModel() {
     earned,
     remaining,
     missed,
-    possible
+    possible,
+    potential
   };
 
   return model;
+}
+
+function loadConfig() {
+  return loadFromLocalStorage('config', configStructureVersion) || {
+    dayStartTime: 8 * 3600000, // 8 AM
+    dayEndTime: 22 * 3600000, // 10 PM
+    earnRate: 0.5 / minute // Half a dollar a minute
+  };
 }
