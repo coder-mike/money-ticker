@@ -2,8 +2,8 @@
 
 const hour = 3600000;
 const minute = 60000;
-const modelStructureVersion = 1;
-const configStructureVersion = 1;
+const modelStructureVersion = 5;
+const configStructureVersion = 5;
 
 const earnedTicker = document.querySelector('#earned');
 const remainingTicker = document.querySelector('#remaining');
@@ -11,8 +11,8 @@ const missedTicker = document.querySelector('#missed');
 const possibleTicker = document.querySelector('#possible');
 const pauseContinueButton = document.querySelector('#pause-continue');
 
-const config = loadConfig();
-const model = loadModel(config);
+let config, model;
+load();
 
 pauseContinueButton.addEventListener('click', pauseClick);
 save();
@@ -23,14 +23,21 @@ function save() {
   saveToLocalStorage('config', config, configStructureVersion);
 }
 
+function load() {
+  config = loadConfig();
+  model = loadModel(config);
+}
+
+function applyConfig() {
+  updateModel(model);
+  save();
+  render();
+}
+
 function pauseClick() {
   model.isPaused = !model.isPaused;
-  const effectiveRate = model.isPaused ? 0 : config.earnRate;
   const now = Date.now();
-  model.earned = Linear.changeRate(model.earned, now, effectiveRate);
-  // TODO: There's some redundancy here
-  model.missed = Linear.subtract(model.potential, model.earned);
-  model.possible = Linear.add(model.earned, model.remaining);
+  updateModel(model);
   render();
   save();
 }
@@ -53,37 +60,46 @@ function render() {
 function loadModel(config) {
   const now = Date.now();
   const day = new Date(now).setHours(0, 0, 0, 0);
-
   const dayStart = day + config.dayStartTime;
-  const dayEnd = day + config.dayEndTime;
-  const earnRate = config.earnRate;
 
   const loaded = loadFromLocalStorage('model', modelStructureVersion);
   // If the model stored in local storage is from today, then use that
   if (loaded && loaded.dayStart === dayStart) return loaded;
 
-  // What we have earned
-  const earned = Linear.create(now, 0, earnRate);
-  // Amount that could have been earned by now
-  const potential = Linear.create(dayStart, 0, earnRate);
-  // Amount that can still be earned from now
-  const remaining = Linear.create(dayEnd, 0, -earnRate);
-  // Amount we missed out on
-  const missed = Linear.subtract(potential, earned);
-  // Amount that's still possible
-  const possible = Linear.add(earned, remaining);
-
   const model = {
     dayStart,
     isPaused: false,
-    earned,
-    remaining,
-    missed,
-    possible,
-    potential
+    // These will get updated later
+    earned: Linear.constant(0),
+    potential: Linear.constant(0),
+    remaining: Linear.constant(0),
+    missed: Linear.constant(0),
+    possible: Linear.constant(0),
   };
 
+  updateModel(model);
+
   return model;
+}
+
+function updateModel(model) {
+  const now = Date.now();
+  const day = new Date(now).setHours(0, 0, 0, 0);
+  const dayStart = day + config.dayStartTime;
+  const dayEnd = day + config.dayEndTime;
+  const earnRate = config.earnRate;
+  const effectiveRate = model.isPaused ? 0 : config.earnRate;
+
+  // What we have earned
+  model.earned = Linear.changeRate(model.earned, now, effectiveRate);
+  // Amount that could have been earned by now
+  model.potential = Linear.create(dayStart, 0, earnRate);
+  // Amount that can still be earned from now
+  model.remaining = Linear.create(dayEnd, 0, -earnRate);
+  // Amount we missed out on
+  model.missed = Linear.subtract(model.potential, model.earned);
+  // Amount that's still possible
+  model.possible = Linear.add(model.earned, model.remaining);
 }
 
 function loadConfig() {
