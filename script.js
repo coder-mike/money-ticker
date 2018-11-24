@@ -1,94 +1,79 @@
 'use strict';
 
-const oneHour = 3600000;
+const hour = 3600000;
+const minute = 60000;
 
 document.querySelector('#pause-continue').addEventListener('click', pauseClick);
 
 const earnedTicker = document.querySelector('#earned');
 const remainingTicker = document.querySelector('#remaining');
 const missedTicker = document.querySelector('#missed');
-const targetTicker = document.querySelector('#target');
+const possibleTicker = document.querySelector('#possible');
 
-const dayStartTime = 8 * 3600000; // 8 AM
-const dayEndTime = 22 * 3600000; // 10 PM
-
-const day = new Date().setHours(0,0,0,0);
-const dayStart = +day + dayStartTime;
-const dayEnd = +day + dayEndTime;
-
-earnedTicker.value = loadValue('earned', {
-  startTime: Date.now(),
-  startValue: 0,
-  rate: 60 / oneHour,
-  ticking: true
-});
-
-remainingTicker.value = {
-  startTime: dayEnd,
-  startValue: 0,
-  rate: -60 / oneHour,
-  ticking: true
-};
-
-missedTicker.value = {
-  startTime: dayEnd,
-  startValue: remainingTicker.valueAt(dayStart) - earnedTicker.valueAt(dayEnd),
-  rate: 60 / oneHour,
-  ticking: !earnedTicker.value.ticking,
-};
-
-targetTicker.value = {
-  startTime: dayEnd,
-  startValue: remainingTicker.valueAt(dayStart) - earnedTicker.valueAt(dayEnd),
-  rate: 60 / oneHour,
-  ticking: !earnedTicker.value.ticking,
-};
+const model = loadModel();
 
 save();
-updatePauseButton();
+render();
 
 function save() {
-  saveValue('earned', earnedTicker.value);
-  saveValue('remaining', remainingTicker.value);
-}
-
-function loadValue(key, defaultValue) {
-  try {
-    const encoded = window.localStorage.getItem(key);
-    if (encoded === null || encoded === undefined) return defaultValue;
-    const decoded = JSON.parse(encoded);
-    return decoded;
-  } catch (e) {
-    console.error(e);
-    return defaultValue;
-  }
-}
-
-function saveValue(key, value) {
-  window.localStorage.setItem(key, JSON.stringify(value));
+  window.localStorage.setItem('model', JSON.stringify(model));
 }
 
 function pauseClick() {
-  earnedTicker.value = {
-    ...earnedTicker.value,
-    ticking: !earnedTicker.value.ticking
-  };
-  missedTicker.value = {
-    ...missedTicker.value,
-    ticking: !earnedTicker.value.ticking
-  };
-  updatePauseButton();
+  model.isPaused = !model.isPaused;
+  render();
   save();
 }
 
-function updatePauseButton() {
-  console.log('ticking', earnedTicker.value.ticking)
+function render() {
+  earnedTicker.value = model.earned;
+  remainingTicker.value = model.remaining;
+  missedTicker.value = model.missed;
+  possibleTicker.value = model.possible;
   const pauseContinueButton = document.querySelector('#pause-continue');
-  if (earnedTicker.value.ticking) {
-    pauseContinueButton.value = 'Pause';
-    pauseContinueButton.classList.remove('paused');
-  } else {
+  if (model.isPaused) {
     pauseContinueButton.value = 'Continue';
     pauseContinueButton.classList.add('paused');
+  } else {
+    pauseContinueButton.value = 'Pause';
+    pauseContinueButton.classList.remove('paused');
   }
+}
+
+function loadModel() {
+
+  const now = Date.now();
+  const day = new Date(now).setHours(0, 0, 0, 0);
+
+  const dayStartTime = 8 * 3600000; // 8 AM
+  const dayEndTime = 22 * 3600000; // 10 PM
+  const dayStart = day + dayStartTime;
+  const dayEnd = day + dayEndTime;
+  const earnRate = 1 / minute;
+
+  const loaded = JSON.parse(window.localStorage.getItem('model'));
+  // If the model stored in local storage is from today, then use that
+  if (loaded && loaded.dayStart === dayStart) return loaded;
+
+  // What we have earned
+  const earned = Linear.create(now, 0, earnRate);
+  // Amount that could have been earned by now
+  const potential = Linear.create(dayStart, 0, earnRate);
+  // Amount that can still be earned from now
+  const remaining = Linear.create(dayEnd, 0, -earnRate);
+  // Amount we missed out on
+  const missed = Linear.subtract(potential, earned);
+  // Amount that's still possible
+  const possible = Linear.add(earned, remaining);
+
+  const model = {
+    dayStart,
+    isPaused: false,
+    earned,
+    remaining,
+    missed,
+    possible
+  };
+
+  return model;
 }

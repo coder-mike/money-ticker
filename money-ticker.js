@@ -1,6 +1,5 @@
 'use strict';
 
-
 const animatedTransition = true;
 const decimals = 1;
 const increment = 1 / Math.pow(10, decimals);
@@ -31,33 +30,29 @@ class MoneyTicker extends HTMLElement {
 
     this.timeout = undefined;
     this._ticking = false;
-    this._value = {
-      startTime: 0,
-      startValue: 0,
-      rate: 0,
-      ticking: false
-    };
+    this._value = Linear.constant(0);
     this.frame = 0;
     this.updateFrame();
   }
 
   get value() {
-    this.resetStart();
-    return {...this._value };
+    return Linear.changeTime(this._value);
   };
+
   set value(value) {
-    this._value = { ...value };
+    this._value = Linear.coerceToLinear(value);
     this.updateFrame();
   }
 
   updateFrame() {
-    const { startTime, rate, startValue, ticking } = this._value;
+    const { time, rate, value } = this._value;
+    const ticking = rate !== 0;
 
     this.timeout && clearTimeout(this.timeout);
     this.timeout = undefined;
 
     const now = Date.now();
-    const currentValue = this.valueAt(now);
+    const currentValue = Linear.valueAt(this._value, now);
     const increasing = rate >= 0;
     const prevValue =
       increasing
@@ -76,7 +71,7 @@ class MoneyTicker extends HTMLElement {
     nextEl.innerHTML = renderValue(nextValue);
 
     if (ticking) {
-      const timeOfNext = startTime + (nextValue - startValue) / rate;
+      const timeOfNext = time + (nextValue - value) / rate;
       const sleepAmount = timeOfNext - now;
 
       if (animatedTransition && sleepAmount > 15) {
@@ -99,23 +94,6 @@ class MoneyTicker extends HTMLElement {
       this.counter2.style.opacity = this.frame === 0 ? 0 : 1;
     }
     this.frame = (this.frame + 1) % 2;
-  }
-
-  valueAt(now) {
-    const { startValue, startTime, rate, ticking } = this._value;
-    return startValue + (now - startTime) * rate * (ticking ? 1 : 0);
-  }
-
-  resetStart() {
-    const now = Date.now();
-    this._value.startValue = this.valueAt(now);
-    this._value.startTime = now;
-  }
-
-  setValue(newValue) {
-    this.resetStart();
-    this._value.startValue = newValue;
-    earnedTicker.updateFrame();
   }
 }
 
